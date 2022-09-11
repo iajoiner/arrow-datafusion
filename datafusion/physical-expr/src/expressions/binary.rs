@@ -20,7 +20,7 @@ mod kernels;
 mod kernels_arrow;
 
 use std::convert::TryInto;
-use std::{any::Any, sync::Arc};
+use std::{any::{type_name, Any}, sync::Arc};
 
 use arrow::array::*;
 use arrow::compute::kernels::arithmetic::{
@@ -75,7 +75,7 @@ use arrow::record_batch::RecordBatch;
 use crate::expressions::try_cast;
 use crate::PhysicalExpr;
 use datafusion_common::ScalarValue;
-use datafusion_common::{DataFusionError, Result};
+use datafusion_common::{downcast_value, DataFusionError, Result};
 use datafusion_expr::binary_rule::binary_operator_data_type;
 use datafusion_expr::{binary_rule::coerce_types, ColumnarValue, Operator};
 
@@ -121,7 +121,7 @@ impl std::fmt::Display for BinaryExpr {
 
 macro_rules! compute_decimal_op_scalar {
     ($LEFT:expr, $RIGHT:expr, $OP:ident, $DT:ident) => {{
-        let ll = $LEFT.as_any().downcast_ref::<$DT>().unwrap();
+        let ll = downcast_value!($LEFT, $DT);
         Ok(Arc::new(paste::expr! {[<$OP _decimal_scalar>]}(
             ll,
             $RIGHT.try_into()?,
@@ -131,8 +131,8 @@ macro_rules! compute_decimal_op_scalar {
 
 macro_rules! compute_decimal_op {
     ($LEFT:expr, $RIGHT:expr, $OP:ident, $DT:ident) => {{
-        let ll = $LEFT.as_any().downcast_ref::<$DT>().unwrap();
-        let rr = $RIGHT.as_any().downcast_ref::<$DT>().unwrap();
+        let ll = downcast_value!($LEFT, $DT);
+        let rr = downcast_value!($RIGHT, $DT);
         Ok(Arc::new(paste::expr! {[<$OP _decimal>]}(ll, rr)?))
     }};
 }
@@ -498,7 +498,7 @@ macro_rules! compute_utf8_flag_op {
         };
         let mut array = paste::expr! {[<$OP _utf8>]}(&ll, &rr, flag.as_ref())?;
         if $NOT {
-            array = not(&array).unwrap();
+            array = not(&array)?;
         }
         Ok(Arc::new(array))
     }};
@@ -535,7 +535,7 @@ macro_rules! compute_utf8_flag_op_scalar {
             let mut array =
                 paste::expr! {[<$OP _utf8_scalar>]}(&ll, &string_value, flag)?;
             if $NOT {
-                array = not(&array).unwrap();
+                array = not(&array)?;
             }
             Ok(Arc::new(array))
         } else {

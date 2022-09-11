@@ -19,10 +19,10 @@
 //! datafusion and not (yet) targeted to  port upstream to arrow
 use arrow::array::*;
 use arrow::datatypes::DataType;
-use datafusion_common::{DataFusionError, Result, ScalarValue};
+use datafusion_common::{downcast_value, DataFusionError, Result, ScalarValue};
 use datafusion_expr::Operator;
 
-use std::sync::Arc;
+use std::{any::type_name, sync::Arc};
 
 /// The binary_bitwise_array_op macro only evaluates for integer types
 /// like int64, int32.
@@ -30,8 +30,8 @@ use std::sync::Arc;
 macro_rules! binary_bitwise_array_op {
     ($LEFT:expr, $RIGHT:expr, $METHOD:expr, $ARRAY_TYPE:ident) => {{
         let len = $LEFT.len();
-        let left = $LEFT.as_any().downcast_ref::<$ARRAY_TYPE>().unwrap();
-        let right = $RIGHT.as_any().downcast_ref::<$ARRAY_TYPE>().unwrap();
+        let left = downcast_value!($LEFT, $ARRAY_TYPE);
+        let right = downcast_value!($RIGHT, $ARRAY_TYPE);
         let result = (0..len)
             .into_iter()
             .map(|i| {

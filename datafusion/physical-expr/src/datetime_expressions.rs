@@ -36,9 +36,10 @@ use arrow::{
 };
 use chrono::prelude::*;
 use chrono::Duration;
-use datafusion_common::{DataFusionError, Result};
+use datafusion_common::{downcast_value, DataFusionError, Result};
 use datafusion_common::{ScalarType, ScalarValue};
 use datafusion_expr::ColumnarValue;
+use std::any::type_name;
 use std::borrow::Borrow;
 use std::sync::Arc;
 
