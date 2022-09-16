@@ -17,7 +17,7 @@
 
 //! InList expression
 
-use std::any::Any;
+use std::any::{Any, type_name};
 use std::collections::HashSet;
 use std::sync::Arc;
 
@@ -25,7 +25,7 @@ use arrow::array::GenericStringArray;
 use arrow::array::{
     ArrayRef, BooleanArray, Float32Array, Float64Array, Int16Array, Int32Array,
     Int64Array, Int8Array, OffsetSizeTrait, UInt16Array, UInt32Array, UInt64Array,
-    UInt8Array,
+    UInt8Array
 };
 use arrow::{
     datatypes::{DataType, Schema},
@@ -39,7 +39,7 @@ use datafusion_common::ScalarValue::{
     Binary, Boolean, Date32, Date64, Decimal128, Int16, Int32, Int64, Int8, LargeBinary,
     LargeUtf8, UInt16, UInt32, UInt64, UInt8, Utf8,
 };
-use datafusion_common::{DataFusionError, Result};
+use datafusion_common::{downcast_value, DataFusionError, Result};
 use datafusion_expr::ColumnarValue;
 
 /// Size at which to use a Set rather than Vec for `IN` / `NOT IN`
@@ -530,7 +530,7 @@ impl PhysicalExpr for InListExpr {
             let set = in_set.get_set();
             match value_data_type {
                 DataType::Boolean => {
-                    let array = array.as_any().downcast_ref::<BooleanArray>().unwrap();
+                    let array = downcast_value!(array, BooleanArray);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -540,7 +540,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Int8 => {
-                    let array = array.as_any().downcast_ref::<Int8Array>().unwrap();
+                    let array = downcast_value!(array, Int8Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -550,7 +550,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Int16 => {
-                    let array = array.as_any().downcast_ref::<Int16Array>().unwrap();
+                    let array = downcast_value!(array, Int16Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -560,7 +560,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Int32 => {
-                    let array = array.as_any().downcast_ref::<Int32Array>().unwrap();
+                    let array = downcast_value!(array, Int32Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -570,7 +570,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Int64 => {
-                    let array = array.as_any().downcast_ref::<Int64Array>().unwrap();
+                    let array = downcast_value!(array, Int64Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -580,7 +580,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::UInt8 => {
-                    let array = array.as_any().downcast_ref::<UInt8Array>().unwrap();
+                    let array = downcast_value!(array, UInt8Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -590,7 +590,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::UInt16 => {
-                    let array = array.as_any().downcast_ref::<UInt16Array>().unwrap();
+                    let array = downcast_value!(array, UInt16Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -600,7 +600,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::UInt32 => {
-                    let array = array.as_any().downcast_ref::<UInt32Array>().unwrap();
+                    let array = downcast_value!(array, UInt32Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -610,7 +610,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::UInt64 => {
-                    let array = array.as_any().downcast_ref::<UInt64Array>().unwrap();
+                    let array = downcast_value!(array, UInt64Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -620,7 +620,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Date32 => {
-                    let array = array.as_any().downcast_ref::<Date32Array>().unwrap();
+                    let array = downcast_value!(array, Date32Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -630,7 +630,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Date64 => {
-                    let array = array.as_any().downcast_ref::<Date64Array>().unwrap();
+                    let array = downcast_value!(array, Date64Array);
                     Ok(set_contains_for_primitive!(
                         array,
                         set,
@@ -640,7 +640,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Float32 => {
-                    let array = array.as_any().downcast_ref::<Float32Array>().unwrap();
+                    let array = downcast_value!(array, Float32Array);
                     Ok(set_contains_for_float!(
                         array,
                         set,
@@ -650,7 +650,7 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Float64 => {
-                    let array = array.as_any().downcast_ref::<Float64Array>().unwrap();
+                    let array = downcast_value!(array, Float64Array);
                     Ok(set_contains_for_float!(
                         array,
                         set,
@@ -660,35 +660,23 @@ impl PhysicalExpr for InListExpr {
                     ))
                 }
                 DataType::Utf8 => {
-                    let array = array
-                        .as_any()
-                        .downcast_ref::<GenericStringArray<i32>>()
-                        .unwrap();
+                    let array = downcast_value!(array, GenericStringArray, i32);
                     Ok(set_contains_utf8(array, set, self.negated))
                 }
                 DataType::LargeUtf8 => {
-                    let array = array
-                        .as_any()
-                        .downcast_ref::<GenericStringArray<i64>>()
-                        .unwrap();
+                    let array = downcast_value!(array, GenericStringArray, i64);
                     Ok(set_contains_utf8(array, set, self.negated))
                 }
                 DataType::Binary => {
-                    let array = array
-                        .as_any()
-                        .downcast_ref::<GenericBinaryArray<i32>>()
-                        .unwrap();
+                    let array = downcast_value!(array, GenericBinaryArray, i32);
                     Ok(set_contains_binary(array, set, self.negated))
                 }
                 DataType::LargeBinary => {
-                    let array = array
-                        .as_any()
-                        .downcast_ref::<GenericBinaryArray<i64>>()
-                        .unwrap();
+                    let array = downcast_value!(array, GenericBinaryArray, i64);
                     Ok(set_contains_binary(array, set, self.negated))
                 }
                 DataType::Decimal128(_, _) => {
-                    let array = array.as_any().downcast_ref::<Decimal128Array>().unwrap();
+                    let array = downcast_value!(array, Decimal128Array);
                     Ok(make_set_contains_decimal(array, set, self.negated))
                 }
                 datatype => Result::Err(DataFusionError::NotImplemented(format!(
