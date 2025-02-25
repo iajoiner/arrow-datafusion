@@ -21,7 +21,7 @@ use datafusion_expr::{JoinType, LogicalPlan, LogicalPlanBuilder};
 use sqlparser::ast::{
     Join, JoinConstraint, JoinOperator, ObjectName, TableFactor, TableWithJoins,
 };
-use std::collections::HashSet;
+use indexmap::IndexSet;
 
 impl<S: ContextProvider> SqlToRel<'_, S> {
     pub(crate) fn plan_table_with_joins(
@@ -146,7 +146,7 @@ impl<S: ContextProvider> SqlToRel<'_, S> {
                     .build()
             }
             JoinConstraint::Natural => {
-                let left_cols: HashSet<&String> =
+                let left_cols: IndexSet<&String> =
                     left.schema().fields().iter().map(|f| f.name()).collect();
                 let keys: Vec<Column> = right
                     .schema()

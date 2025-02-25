@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use std::{collections::HashMap, sync::Arc};
+use alloc::sync::Arc;
 
 use arrow::datatypes::{DataType, Field, Schema};
 
@@ -33,6 +33,7 @@ use datafusion_sql::{
     planner::{ContextProvider, SqlToRel},
     sqlparser::{dialect::GenericDialect, parser::Parser},
 };
+use indexmap::IndexMap;
 
 fn main() {
     let sql = "SELECT \
@@ -67,8 +68,8 @@ fn main() {
 
 struct MyContextProvider {
     options: ConfigOptions,
-    tables: HashMap<String, Arc<dyn TableSource>>,
-    udafs: HashMap<String, Arc<AggregateUDF>>,
+    tables: IndexMap<String, Arc<dyn TableSource>>,
+    udafs: IndexMap<String, Arc<AggregateUDF>>,
     expr_planners: Vec<Arc<dyn ExprPlanner>>,
 }
 
@@ -84,7 +85,7 @@ impl MyContextProvider {
     }
 
     fn new() -> Self {
-        let mut tables = HashMap::new();
+        let mut tables = IndexMap::new();
         tables.insert(
             "customer".to_string(),
             create_table_source(vec![
@@ -122,7 +123,7 @@ impl MyContextProvider {
 
 fn create_table_source(fields: Vec<Field>) -> Arc<dyn TableSource> {
     Arc::new(LogicalTableSource::new(Arc::new(
-        Schema::new_with_metadata(fields, HashMap::new()),
+        Schema::new_with_metadata(fields, IndexMap::new()),
     )))
 }
 

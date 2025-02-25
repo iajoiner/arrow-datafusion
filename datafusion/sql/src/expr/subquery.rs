@@ -22,7 +22,7 @@ use datafusion_expr::expr::InSubquery;
 use datafusion_expr::{Expr, Subquery};
 use sqlparser::ast::Expr as SQLExpr;
 use sqlparser::ast::Query;
-use std::sync::Arc;
+use alloc::sync::Arc;
 
 impl<S: ContextProvider> SqlToRel<'_, S> {
     pub(super) fn parse_exists_subquery(

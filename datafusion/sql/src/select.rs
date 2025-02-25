@@ -15,8 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use std::collections::HashSet;
-use std::sync::Arc;
+use alloc::sync::Arc;
 
 use crate::planner::{ContextProvider, PlannerContext, SqlToRel};
 use crate::utils::{
@@ -41,7 +40,7 @@ use datafusion_expr::{
     GroupingSet, LogicalPlan, LogicalPlanBuilder, Partitioning,
 };
 
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 use sqlparser::ast::{
     Distinct, Expr as SQLExpr, GroupByExpr, NamedWindowExpr, OrderByExpr,
     WildcardAdditionalOptions, WindowType,
@@ -393,7 +392,7 @@ impl<S: ContextProvider> SqlToRel<'_, S> {
         &self,
         agg: Aggregate,
     ) -> Result<(LogicalPlan, Vec<Expr>)> {
-        let mut aggr_expr_using_columns: Option<HashSet<Expr>> = None;
+        let mut aggr_expr_using_columns: Option<IndexSet<Expr>> = None;
 
         let Aggregate {
             input,
@@ -440,7 +439,7 @@ impl<S: ContextProvider> SqlToRel<'_, S> {
                 let mut projection_exprs = match &aggr_expr_using_columns {
                     Some(exprs) => (*exprs).clone(),
                     None => {
-                        let mut columns = HashSet::new();
+                        let mut columns = IndexSet::new();
                         for expr in &aggr_expr {
                             expr.apply(|expr| {
                                 if let Expr::Column(c) = expr {
@@ -514,7 +513,7 @@ impl<S: ContextProvider> SqlToRel<'_, S> {
                     );
                 }
 
-                let mut using_columns = HashSet::new();
+                let mut using_columns = IndexSet::new();
                 expr_to_columns(&filter_expr, &mut using_columns)?;
                 let filter_expr = normalize_col_with_schemas_and_ambiguity_check(
                     filter_expr,

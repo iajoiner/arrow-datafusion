@@ -34,10 +34,10 @@ use datafusion_expr::{lit, Expr, Operator};
 use log::debug;
 use sqlparser::ast::{BinaryOperator, Expr as SQLExpr, Interval, UnaryOperator, Value};
 use sqlparser::parser::ParserError::ParserError;
-use std::borrow::Cow;
-use std::cmp::Ordering;
-use std::ops::Neg;
-use std::str::FromStr;
+use alloc::borrow::Cow;
+use core::cmp::Ordering;
+use core::ops::Neg;
+use alloc::str::FromStr;
 
 impl<S: ContextProvider> SqlToRel<'_, S> {
     pub(crate) fn parse_value(

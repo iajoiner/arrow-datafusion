@@ -16,9 +16,9 @@
 // under the License.
 
 //! [`SqlToRel`]: SQL Query Planner (produces [`LogicalPlan`] from SQL AST)
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::vec;
+use indexmap::IndexMap;
+use alloc::sync::Arc;
+use alloc::vec;
 
 use arrow::datatypes::*;
 use datafusion_common::error::add_possible_columns_to_diag;
@@ -107,7 +107,7 @@ pub struct PlannerContext {
     prepare_param_data_types: Arc<Vec<DataType>>,
     /// Map of CTE name to logical plan of the WITH clause.
     /// Use `Arc<LogicalPlan>` to allow cheap cloning
-    ctes: HashMap<String, Arc<LogicalPlan>>,
+    ctes: IndexMap<String, Arc<LogicalPlan>>,
     /// The query schema of the outer query plan, used to resolve the columns in subquery
     outer_query_schema: Option<DFSchemaRef>,
     /// The joined schemas of all FROM clauses planned so far. When planning LATERAL
@@ -128,7 +128,7 @@ impl PlannerContext {
     pub fn new() -> Self {
         Self {
             prepare_param_data_types: Arc::new(vec![]),
-            ctes: HashMap::new(),
+            ctes: IndexMap::new(),
             outer_query_schema: None,
             outer_from_schema: None,
             create_table_schema: None,

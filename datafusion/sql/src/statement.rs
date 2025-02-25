@@ -15,10 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use alloc::collections::BTreeMap;
 use std::path::Path;
-use std::str::FromStr;
-use std::sync::Arc;
+use alloc::str::FromStr;
+use alloc::sync::Arc;
 
 use crate::parser::{
     CopyToSource, CopyToStatement, CreateExternalTable, DFParser, ExplainStatement,
@@ -54,6 +54,7 @@ use datafusion_expr::{
     TransactionConclusion, TransactionEnd, TransactionIsolationLevel, TransactionStart,
     Volatility, WriteOp,
 };
+use indexmap::{IndexMap, IndexSet};
 use sqlparser::ast::{
     self, BeginTransactionKind, NullsDistinctOption, ShowStatementIn,
     ShowStatementOptions, SqliteOnConflict, TableObject, UpdateTableFromKind,
@@ -1526,8 +1527,8 @@ impl<S: ContextProvider> SqlToRel<'_, S> {
         &self,
         options: Vec<(String, Value)>,
         allow_duplicates: bool,
-    ) -> Result<HashMap<String, String>> {
-        let mut options_map = HashMap::new();
+    ) -> Result<IndexMap<String, String>> {
+        let mut options_map = IndexMap::new();
         for (key, value) in options {
             if !allow_duplicates && options_map.contains_key(&key) {
                 return plan_err!("Option {key} is specified multiple times");
@@ -1725,7 +1726,7 @@ impl<S: ContextProvider> SqlToRel<'_, S> {
                 let filter_expr =
                     self.sql_to_expr(predicate_expr, &schema, &mut planner_context)?;
                 let schema = Arc::new(schema.clone());
-                let mut using_columns = HashSet::new();
+                let mut using_columns = IndexSet::new();
                 expr_to_columns(&filter_expr, &mut using_columns)?;
                 let filter_expr = normalize_col_with_schemas_and_ambiguity_check(
                     filter_expr,
@@ -1783,7 +1784,7 @@ impl<S: ContextProvider> SqlToRel<'_, S> {
                 table_schema.field_with_unqualified_name(&col_name.value)?;
                 Ok((col_name.value.clone(), assign.value.clone()))
             })
-            .collect::<Result<HashMap<String, SQLExpr>>>()?;
+            .collect::<Result<IndexMap<String, SQLExpr>>>()?;
 
         // Build scan, join with from table if it exists.
         let mut input_tables = vec![table];
@@ -1799,7 +1800,7 @@ impl<S: ContextProvider> SqlToRel<'_, S> {
                     scan.schema(),
                     &mut planner_context,
                 )?;
-                let mut using_columns = HashSet::new();
+                let mut using_columns = IndexSet::new();
                 expr_to_columns(&filter_expr, &mut using_columns)?;
                 let filter_expr = normalize_col_with_schemas_and_ambiguity_check(
                     filter_expr,

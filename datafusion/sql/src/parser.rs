@@ -17,8 +17,8 @@
 
 //! [`DFParser`]: DataFusion SQL Parser based on [`sqlparser`]
 
-use std::collections::VecDeque;
-use std::fmt;
+use alloc::collections::VecDeque;
+use alloc::fmt;
 
 use sqlparser::ast::ExprWithAlias;
 use sqlparser::tokenizer::TokenWithSpan;

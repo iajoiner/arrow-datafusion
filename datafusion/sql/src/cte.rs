@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use std::sync::Arc;
+use alloc::sync::Arc;
 
 use crate::planner::{ContextProvider, PlannerContext, SqlToRel};
 

@@ -16,8 +16,8 @@
 // under the License.
 
 use crate::TableReference;
-use std::collections::BTreeSet;
-use std::ops::ControlFlow;
+use alloc::collections::BTreeSet;
+use core::ops::ControlFlow;
 
 use crate::parser::{CopyToSource, CopyToStatement, Statement as DFStatement};
 use crate::planner::object_name_to_table_reference;

@@ -17,7 +17,7 @@
 
 //! SQL Utility Functions
 
-use std::vec;
+use alloc::vec;
 
 use arrow::datatypes::{
     DataType, DECIMAL128_MAX_PRECISION, DECIMAL256_MAX_PRECISION, DECIMAL_DEFAULT_SCALE,
